@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class Controller : MonoBehaviour
 {
     [SerializeField] private RobotController robotController;
     [SerializeField] private UIController uiController;
+
+    private DataParser dataParser;
 
     [SerializeField] private GameObject mainMenuUI;
 
@@ -26,6 +27,8 @@ public class Controller : MonoBehaviour
 
     void Start()
     {
+        dataParser = this.AddComponent<DataParser>();
+
         pauseGame();
 
         disableAllCameras();
@@ -82,7 +85,13 @@ public class Controller : MonoBehaviour
     {
         mainMenuUI.SetActive(false);
 
-        parseJsonFile();
+        List<Vector3> positions;
+        List<float> timestamps;
+
+        (positions, timestamps) = dataParser.parse(uiController.getFilePath());
+
+        robotController.setPositionsData(positions);
+        robotController.setTimestampsData(timestamps);
 
         robotController.startRobotMovement();
     }
@@ -97,40 +106,5 @@ public class Controller : MonoBehaviour
     {
         Time.timeScale = 1;
         robotController.startRobotMovement();
-    }
-
-    public void parseJsonFile()
-    {
-        string fileAsText = File.ReadAllText(uiController.getFilePath());
-        PositionData positionData = JsonUtility.FromJson<PositionData>(fileAsText);
-
-        List<Vector3> positions = new List<Vector3>();
-        List<float> timestamps = new List<float>();
-
-        foreach (Position pos in positionData.pos)
-        {
-            float x = pos.x;
-            float z = pos.z;
-            positions.Add(new Vector3(x, 6.5f, z));
-            timestamps.Add(pos.timestamp);
-        }
-
-        robotController.setPositionsData(positions);
-        robotController.setTimestampsData(timestamps);
-    }
-
-    [System.Serializable]
-    public class PositionData
-    {
-        public Position[] pos;
-    }
-
-    [System.Serializable]
-    public class Position
-    {
-        public float x;
-        public float z;
-        public float heading;
-        public float timestamp;
     }
 }
