@@ -11,6 +11,15 @@ public class RobotController : MonoBehaviour
     private List<float> timestamps;
     private int currentIndex = 0;
 
+    //public void update()
+    //{
+    //    float moveHorizontal = Input.GetAxis("Horizontal"); // Gets the horizontal input from the user's keyboard
+    //    float moveVertical = Input.GetAxis("Vertical"); // Gets the vertical input from the user's keyboard
+
+    //    Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical); // Creates a vector with the x and z components based on the user's input
+    //    this.GetComponent<Rigidbody>().velocity = movement * 5f; // Applies the movement to the object's Rigidbody component
+    //}
+
     public void setPositionsData(List<Vector3> data)
     {
         positions = data;
@@ -36,10 +45,6 @@ public class RobotController : MonoBehaviour
         while (true)
         {
             Vector3 nextPosition = positions[currentIndex];
-
-            // Vector3 currentPosition = transform.position;
-            // Vector3 direction = (nextPosition - currentPosition).normalized;
-            // transform.position = currentPosition + direction * speed * Time.deltaTime;
 
             transform.position = nextPosition;
 
