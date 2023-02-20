@@ -30,7 +30,6 @@ public class DataParser : MonoBehaviour
     public class RobotData
     {
         public Position[] pos;
-        public float timestamp;
     }
 
     [System.Serializable]
