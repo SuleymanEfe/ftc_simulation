@@ -1,44 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class Controller : MonoBehaviour
 {
+    [SerializeField] private RobotController robotController;
+    [SerializeField] private UIController uiController;
+
+    [SerializeField] private GameObject mainMenuUI;
 
     public Transform robot;
 
-    public Camera cam1;
-    public Camera cam2;
-    public Camera robotCam;
+    public Camera topViewCam;
+    public Camera robotViewCam;
 
-    [SerializeField] private float maxDistance = 50f;
-    [SerializeField] private float minDistance = 30f;
-    [SerializeField] private float scrollSpeed = 4f;
-
-    [SerializeField] private float distanceToTarget = 30;
+    private float maxDistance = 50f;
+    private float minDistance = 30f;
+    private float scrollSpeed = 4f;
+    private float distanceToTarget = 30;
 
     private Vector3 previousPosition;
 
     void Start()
     {
-        disableAllCameras();
+        pauseGame();
 
-        robotCam.enabled = true;
+        disableAllCameras();
+        robotViewCam.enabled = true;
     }
 
-    // Update is called once per frame
     void Update() {
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             disableAllCameras();
-            robotCam.enabled = true;
+            robotViewCam.enabled = true;
         } else if (Input.GetKeyDown(KeyCode.Alpha2)) {
             disableAllCameras();
-            cam1.enabled = true;
-        } else if (Input.GetKeyDown(KeyCode.Alpha3)) {
-            disableAllCameras();
-            cam2.enabled = true;
+            topViewCam.enabled = true;
         }
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
@@ -46,27 +46,27 @@ public class Controller : MonoBehaviour
         distanceToTarget -= scroll * scrollSpeed;
         distanceToTarget = Mathf.Clamp(distanceToTarget, minDistance, maxDistance);
 
-        robotCam.transform.position = robot.position;
-        robotCam.transform.Translate(new Vector3(0, 0, -distanceToTarget));
+        robotViewCam.transform.position = robot.position;
+        robotViewCam.transform.Translate(new Vector3(0, 0, -distanceToTarget));
 
         if (Input.GetMouseButtonDown(0))
         {
-            previousPosition = robotCam.ScreenToViewportPoint(Input.mousePosition);
+            previousPosition = robotViewCam.ScreenToViewportPoint(Input.mousePosition);
         }
         else if (Input.GetMouseButton(0))
         {
-            Vector3 newPosition = robotCam.ScreenToViewportPoint(Input.mousePosition);
+            Vector3 newPosition = robotViewCam.ScreenToViewportPoint(Input.mousePosition);
             Vector3 direction = previousPosition - newPosition;
 
             float rotationAroundYAxis = -direction.x * 180; // camera moves horizontally
             float rotationAroundXAxis = direction.y * 180; // camera moves vertically
 
-            robotCam.transform.position = robot.position;
+            robotViewCam.transform.position = robot.position;
 
-            robotCam.transform.Rotate(new Vector3(1, 0, 0), rotationAroundXAxis);
-            robotCam.transform.Rotate(new Vector3(0, 1, 0), rotationAroundYAxis, Space.World);
+            robotViewCam.transform.Rotate(new Vector3(1, 0, 0), rotationAroundXAxis);
+            robotViewCam.transform.Rotate(new Vector3(0, 1, 0), rotationAroundYAxis, Space.World);
 
-            robotCam.transform.Translate(new Vector3(0, 0, -distanceToTarget));
+            robotViewCam.transform.Translate(new Vector3(0, 0, -distanceToTarget));
 
             previousPosition = newPosition;
         }
@@ -74,16 +74,63 @@ public class Controller : MonoBehaviour
 
     void disableAllCameras()
     {
-        cam1.enabled = false;
-        cam2.enabled = false;
-        robotCam.enabled = false;
+        topViewCam.enabled = false;
+        robotViewCam.enabled = false;
     }
 
-    // Toogle the state of being paused of simulation
-    public void tooglePause()
+    public void startGame()
     {
-        Debug.Log(Time.timeScale);
-        Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+        mainMenuUI.SetActive(false);
+
+        parseJsonFile();
+
+        robotController.startRobotMovement();
     }
 
+    public void pauseGame()
+    {
+        Time.timeScale = 0;
+        robotController.stopRobotMovement();
+    }
+
+    public void continueGame()
+    {
+        Time.timeScale = 1;
+        robotController.startRobotMovement();
+    }
+
+    public void parseJsonFile()
+    {
+        string fileAsText = File.ReadAllText(uiController.getFilePath());
+        PositionData positionData = JsonUtility.FromJson<PositionData>(fileAsText);
+
+        List<Vector3> positions = new List<Vector3>();
+        List<float> timestamps = new List<float>();
+
+        foreach (Position pos in positionData.pos)
+        {
+            float x = pos.x;
+            float z = pos.z;
+            positions.Add(new Vector3(x, 6.5f, z));
+            timestamps.Add(pos.timestamp);
+        }
+
+        robotController.setPositionsData(positions);
+        robotController.setTimestampsData(timestamps);
+    }
+
+    [System.Serializable]
+    public class PositionData
+    {
+        public Position[] pos;
+    }
+
+    [System.Serializable]
+    public class Position
+    {
+        public float x;
+        public float z;
+        public float heading;
+        public float timestamp;
+    }
 }

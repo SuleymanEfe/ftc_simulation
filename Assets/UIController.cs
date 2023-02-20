@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using TMPro;
+using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
-
     private bool isFileChosen = false;
     private string filePath;
     private string fileName;
 
     [SerializeField] TextMeshProUGUI selectedFileNameText;
+    [SerializeField] private Button startButton;
 
     public void openExplorer()
     {
@@ -21,15 +22,21 @@ public class UIController : MonoBehaviour
         isFileChosen = true;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //if (isFileChosen) selectedFileNameText.text = fileName;
+        if (isFileChosen) startButton.interactable = true;
+        else startButton.interactable = false;
+
+        if (isFileChosen) selectedFileNameText.text = fileName;
+    }
+
+    public string getFilePath()
+    {
+        return filePath;
     }
 }

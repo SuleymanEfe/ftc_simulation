@@ -7,39 +7,31 @@ using static MoveRobot;
 
 public class RobotController : MonoBehaviour
 {
-    public TextAsset jsonFile;
     private List<Vector3> positions;
     private List<float> timestamps;
     private int currentIndex = 0;
 
-    void Start()
+    public void setPositionsData(List<Vector3> data)
     {
+        positions = data;
     }
 
-    void OnEnable()
+    public void setTimestampsData(List<float> data)
     {
-        ParseJsonFile();
+        timestamps = data;
+    }
+
+    public void startRobotMovement()
+    {
         StartCoroutine(MoveToNextPosition());
     }
 
-    void ParseJsonFile()
+    public void stopRobotMovement()
     {
-        // Parse the JSON string and create a list of positions
-        PositionData positionData = JsonUtility.FromJson<PositionData>(jsonFile.text);
-
-        positions = new List<Vector3>();
-        timestamps = new List<float>();
-
-        foreach (Position pos in positionData.pos)
-        {
-            float x = pos.x;
-            float z = pos.z;
-            positions.Add(new Vector3(x, 6.5f, z));
-            timestamps.Add(pos.timestamp);
-        }
+        StopAllCoroutines();
     }
 
-    IEnumerator MoveToNextPosition()
+    public IEnumerator MoveToNextPosition()
     {
         while (true)
         {
@@ -61,20 +53,5 @@ public class RobotController : MonoBehaviour
 
             yield return new WaitForSeconds(timestamps[currentIndex + 1] - timestamps[currentIndex]);
         }
-    }
-
-    [System.Serializable]
-    public class PositionData
-    {
-        public Position[] pos;
-    }
-
-    [System.Serializable]
-    public class Position
-    {
-        public float x;
-        public float z;
-        public float heading;
-        public float timestamp;
     }
 }
