@@ -14,6 +14,14 @@ public class UIController : MonoBehaviour
     [SerializeField] TextMeshProUGUI selectedFileNameText;
     [SerializeField] private Button startButton;
 
+
+    [SerializeField] TextMeshProUGUI progressBarText;
+
+    public int progressBarMax = 0;
+    public int progressBarCurrent = 0;
+
+    [SerializeField] private Image progressBarMask;
+
     public void openExplorer()
     {
         filePath = EditorUtility.OpenFilePanel("Chose a file to continue", "", "json");
@@ -29,10 +37,16 @@ public class UIController : MonoBehaviour
 
     void Update()
     {
+        // Main menu - chose file button & text
         if (isFileChosen) startButton.interactable = true;
         else startButton.interactable = false;
 
         if (isFileChosen) selectedFileNameText.text = fileName;
+
+
+        // Progress bar
+        progressBarMask.fillAmount = (float)progressBarCurrent / (float)progressBarMax;
+        progressBarText.text = progressBarCurrent + " / " + progressBarMax;
     }
 
     public string getFilePath()

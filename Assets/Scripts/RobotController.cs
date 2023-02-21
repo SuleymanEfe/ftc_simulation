@@ -11,7 +11,7 @@ public class RobotController : MonoBehaviour
     private List<float> timestamps;
     private int currentIndex = 0;
 
-    [SerializeField] private Vector3 initialPoint = new Vector3(0, 6.5f, -300);
+    [SerializeField] public static Vector3 initialPoint = new Vector3(0, 6.5f, -300);
 
     public void setPositionsData(List<Vector3> data)
     {
@@ -39,20 +39,36 @@ public class RobotController : MonoBehaviour
         {
             Vector3 nextPosition = positions[currentIndex];
 
-            nextPosition.x = initialPoint.x + nextPosition.x;
-            nextPosition.z = initialPoint.z + nextPosition.z;
-
             transform.position = nextPosition;
 
             // Check if the robot has reached the next position
-            if (Vector3.Distance(transform.position, nextPosition) < 0.1f)
-            {
-                currentIndex = (currentIndex + 1) % positions.Count;
+            if (Vector3.Distance(transform.position, nextPosition) < 0.1f) {
+                currentIndex = (currentIndex + 1);
             }
 
             if (currentIndex == positions.Count - 1) currentIndex = 0;
 
             yield return new WaitForSeconds(timestamps[currentIndex + 1] - timestamps[currentIndex]);
         }
+    }
+
+    public void moveOneFrameForward()
+    {
+        if (currentIndex == positions.Count) return;
+
+        currentIndex++;
+        transform.position = positions[currentIndex];
+    }
+
+    public void moveOneFrameBackward()
+    {
+        if (currentIndex == 0) return;
+        currentIndex--;
+        transform.position = positions[currentIndex];
+    }
+
+    public int getCurrentIndex()
+    {
+        return currentIndex;
     }
 }
