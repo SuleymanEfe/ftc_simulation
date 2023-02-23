@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {
-    private bool isPaused = false;
+    private bool isPaused = true;
 
     [SerializeField] private RobotController robotController;
     [SerializeField] private UIController uiController;
@@ -25,7 +25,7 @@ public class Controller : MonoBehaviour
 
         cameraController.init(robot);
 
-        pauseSimulation();
+        //pauseSimulation();
     }
 
     private void Update()
@@ -48,7 +48,7 @@ public class Controller : MonoBehaviour
         mainMenuUI.SetActive(false);
 
         List<Vector3> positions;
-        List<float> timestamps;
+        List<long> timestamps;
 
         (positions, timestamps) = dataParser.parse(uiController.getFilePath());
 

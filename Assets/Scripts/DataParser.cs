@@ -7,15 +7,15 @@ using System;
 public class DataParser : MonoBehaviour
 {
     public List<Vector3> positions;
-    public List<float> timestamps;
+    public List<long> timestamps;
 
-    public (List<Vector3>, List<float>) parse(string filePath)
+    public (List<Vector3>, List<long>) parse(string filePath)
     {
         string fileAsText = File.ReadAllText(filePath);
         RobotData JSONdata = JsonUtility.FromJson<RobotData>(fileAsText);
 
         positions = new List<Vector3>();
-        timestamps = new List<float>();
+        timestamps = new List<long>();
 
         foreach (Position pos in JSONdata.pos)
         {
@@ -46,6 +46,6 @@ public class DataParser : MonoBehaviour
         public float x;
         public float z;
         public float heading;
-        public float timestamp;
+        public long timestamp;
     }
 }
