@@ -24,7 +24,7 @@ public class CameraController : MonoBehaviour
         robotViewCam.enabled = true;
     }
 
-    void Update()
+    void LateUpdate()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
